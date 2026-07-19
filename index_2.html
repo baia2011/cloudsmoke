@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>CLOUD</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#0b1120;
+    --sky-mid:#16213e;
+    --sky-bot:#1b2a4a;
+    --cloud:#eef2ff;
+    --cloud-dim:#c9d3ee;
+    --violet:#8b5cf6;
+    --cyan:#38bdf8;
+    --text:#f1eef7;
+    --text-dim:#93a0c4;
+    --danger:#f2716a;
+    --radius:26px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; height:100%;}
+  body{
+    font-family:'Inter',sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(139,92,246,.35), transparent 55%),
+      radial-gradient(ellipse at 90% 0%, rgba(56,189,248,.25), transparent 50%),
+      linear-gradient(180deg, var(--sky-top), var(--sky-mid) 45%, var(--sky-bot));
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.6;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+      radial-gradient(1px 1px at 80% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 60% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 50%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 60%, #fff, transparent);
+  }
+  .app{position:relative; z-index:1; max-width:520px; margin:0 auto; padding:18px 16px 100px;}
+
+  /* ===== Header ===== */
+  header.top{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:42px; height:42px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--cloud-dim) 40%, var(--violet) 100%);
+    box-shadow:0 0 24px rgba(139,92,246,.55);
+    position:relative;
+  }
+  .brand-mark::after{content:"☁"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));}
+  .brand-name{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:20px; letter-spacing:.5px;}
+  .brand-sub{font-size:11px; color:var(--text-dim); margin-top:-2px;}
+  .cart-pill{
+    display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+    padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600;
+    backdrop-filter:blur(6px);
+  }
+  .cart-pill .dot{width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan);}
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative; border-radius:var(--radius); padding:26px 22px 84px;
+    background:linear-gradient(160deg, rgba(139,92,246,.35), rgba(56,189,248,.18));
+    border:1px solid rgba(255,255,255,.14);
+    overflow:hidden; margin-bottom:20px;
+  }
+  .hero h1{font-family:'Baloo 2',sans-serif; font-size:26px; line-height:1.15; margin:0 0 8px; font-weight:700;}
+  .hero p{margin:0; color:var(--text-dim); font-size:13.5px; max-width:220px;}
+  .hero .puff{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.9), rgba(255,255,255,.15) 60%, transparent 75%);
+    animation:float 6s ease-in-out infinite;
+  }
+  .puff.a{width:120px; height:120px; right:-30px; top:-20px; animation-delay:0s;}
+  .puff.b{width:80px; height:80px; right:40px; top:60px; animation-delay:1.2s;}
+  .puff.c{width:150px; height:150px; right:-60px; bottom:-70px; animation-delay:.6s;}
+  @keyframes float{0%,100%{transform:translateY(0px);} 50%{transform:translateY(-10px);}}
+  .hero button{
+    position:absolute; left:22px; bottom:22px;
+    border:none; cursor:pointer; font-family:'Inter'; font-weight:700; font-size:14px;
+    padding:12px 20px; border-radius:14px; color:#161327;
+    background:linear-gradient(120deg,#fff,#cfe4ff);
+    box-shadow:0 8px 22px rgba(56,189,248,.35);
+  }
+
+  /* ===== Section titles ===== */
+  .section-title{font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700; margin:22px 2px 12px; display:flex; align-items:center; gap:8px;}
+
+  /* ===== Brand tabs ===== */
+  .tabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:6px; scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto; padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:600;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-dim);
+    cursor:pointer; white-space:nowrap; transition:.15s;
+  }
+  .tab.active{background:linear-gradient(120deg,var(--violet),var(--cyan)); color:#0b1120; border-color:transparent;}
+
+  /* ===== Product grid (cloud cards) ===== */
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;}
+  .card{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    border-radius:22px; padding:14px; cursor:pointer; position:relative;
+    backdrop-filter:blur(4px); transition:transform .15s;
+  }
+  .card:active{transform:scale(.97);}
+  .card .puff-badge{
+    width:52px; height:52px; border-radius:50%; margin-bottom:10px;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--cloud-dim) 55%, rgba(139,92,246,.5));
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .card h3{font-size:13.5px; margin:0 0 4px; font-weight:700; line-height:1.25;}
+  .card .price{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--cyan); font-weight:500;}
+  .card .flavor-count{position:absolute; top:12px; right:12px; font-size:10.5px; color:var(--text-dim); background:rgba(0,0,0,.25); padding:3px 8px; border-radius:999px;}
+
+  /* ===== Bottom sheet (flavors / cart / checkout) ===== */
+  .sheet-overlay{position:fixed; inset:0; background:rgba(5,8,20,.55); backdrop-filter:blur(2px); z-index:10; display:none;}
+  .sheet-overlay.show{display:block;}
+  .sheet{
+    position:fixed; left:0; right:0; bottom:0; z-index:11;
+    background:linear-gradient(180deg, #1b2340, #0f1526);
+    border-radius:26px 26px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+    max-height:78vh; overflow-y:auto;
+    transform:translateY(100%); transition:transform .28s ease;
+    box-shadow:0 -10px 40px rgba(0,0,0,.4);
+  }
+  .sheet.show{transform:translateY(0);}
+  .sheet-handle{width:40px; height:4px; border-radius:4px; background:rgba(255,255,255,.25); margin:0 auto 14px;}
+  .sheet h2{font-family:'Baloo 2',sans-serif; font-size:19px; margin:0 0 4px;}
+  .sheet .sub{color:var(--text-dim); font-size:13px; margin-bottom:14px;}
+  .flavor-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 4px; border-bottom:1px solid rgba(255,255,255,.08); cursor:pointer;
+  }
+  .flavor-row:last-child{border-bottom:none;}
+  .flavor-row span{font-size:14px;}
+  .flavor-row .add-mark{
+    width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:rgba(56,189,248,.18); color:var(--cyan); font-weight:700;
+  }
+
+  .cart-item{display:flex; justify-content:space-between; align-items:flex-start; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08); gap:10px;}
+  .cart-item:last-child{border-bottom:none;}
+  .cart-item .info{font-size:13.5px; line-height:1.4;}
+  .cart-item .info b{display:block; font-size:14px;}
+  .cart-item .price{font-family:'IBM Plex Mono',monospace; color:var(--cyan); font-size:13px; white-space:nowrap;}
+  .cart-item .remove{background:none; border:none; color:var(--danger); font-size:12px; cursor:pointer; padding:4px 0;}
+
+  .total-row{display:flex; justify-content:space-between; align-items:center; padding:16px 2px 4px; font-family:'Baloo 2',sans-serif; font-size:17px; font-weight:700;}
+
+  .field{margin-top:12px;}
+  .field label{font-size:12.5px; color:var(--text-dim); display:block; margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.05); color:var(--text); font-size:14px; font-family:'Inter';
+  }
+  .field select option{color:#111;}
+
+  .primary-btn{
+    width:100%; margin-top:16px; border:none; cursor:pointer; padding:15px; border-radius:16px;
+    font-weight:700; font-size:15px; color:#0b1120;
+    background:linear-gradient(120deg,var(--cyan),var(--violet));
+    box-shadow:0 8px 24px rgba(139,92,246,.4);
+  }
+  .primary-btn:disabled{opacity:.4;}
+  .ghost-btn{
+    width:100%; margin-top:10px; border:1px solid rgba(255,255,255,.16); background:none; color:var(--text-dim);
+    padding:12px; border-radius:14px; font-size:13px; cursor:pointer;
+  }
+  .empty-note{text-align:center; color:var(--text-dim); font-size:13.5px; padding:30px 10px;}
+
+  /* ===== Bottom nav ===== */
+  nav.bottom{
+    position:fixed; left:0; right:0; bottom:0; z-index:9;
+    display:flex; justify-content:space-around; align-items:center;
+    padding:10px 8px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(11,17,32,.85); backdrop-filter:blur(10px);
+    border-top:1px solid rgba(255,255,255,.08);
+  }
+  nav.bottom .item{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; color:var(--text-dim); position:relative;}
+  nav.bottom .item.active{color:var(--cyan);}
+  nav.bottom .icon{font-size:19px;}
+  nav.bottom .badge{
+    position:absolute; top:-4px; right:-10px; background:var(--danger); color:#fff; font-size:9px;
+    min-width:16px; height:16px; border-radius:8px; display:flex; align-items:center; justify-content:center; padding:0 3px;
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-name">CLOUD</div>
+        <div class="brand-sub">по-настоящему густой пар ☁️</div>
+      </div>
+    </div>
+    <div class="cart-pill" onclick="openCart()">
+      <span class="dot"></span>
+      <span id="cartPillText">Корзина 0</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="puff a"></div>
+    <div class="puff b"></div>
+    <div class="puff c"></div>
+    <h1>Найди свой пар<br>в облаках вкуса</h1>
+    <p>Waka · Vapeak · MaskKing · Elf Bar — оригинал, доставка по КР</p>
+    <button onclick="scrollToCatalog()">Смотреть каталог →</button>
+  </section>
+
+  <div id="catalogAnchor"></div>
+  <div class="section-title">☁️ Марки</div>
+  <div class="tabs" id="brandTabs"></div>
+
+  <div class="grid" id="productGrid"></div>
+
+</div>
+
+<div class="sheet-overlay" id="overlay" onclick="closeSheets()"></div>
+
+<!-- Лист вкусов -->
+<div class="sheet" id="flavorSheet">
+  <div class="sheet-handle"></div>
+  <h2 id="flavorTitle">Модель</h2>
+  <div class="sub" id="flavorSub"></div>
+  <div id="flavorList"></div>
+</div>
+
+<!-- Лист корзины / оформления -->
+<div class="sheet" id="cartSheet">
+  <div class="sheet-handle"></div>
+  <h2>🛒 Корзина</h2>
+  <div class="sub">Проверьте заказ перед оформлением</div>
+  <div id="cartList"></div>
+  <div class="total-row" id="totalRow" style="display:none;">
+    <span>Итого</span><span id="totalPrice"></span>
+  </div>
+
+  <div id="checkoutFields" style="display:none;">
+    <div class="field">
+      <label>Город доставки</label>
+      <select id="cityInput"></select>
+    </div>
+    <div class="field">
+      <label>Адрес (улица, дом, ориентир)</label>
+      <input id="addressInput" placeholder="Например: ул. Чуй 123, кв 4" />
+    </div>
+    <div class="field">
+      <label>Номер телефона</label>
+      <input id="phoneInput" placeholder="0700 123 456" />
+    </div>
+  </div>
+
+  <button class="primary-btn" id="checkoutBtn" onclick="handleCheckoutClick()">Оформить заказ</button>
+  <button class="ghost-btn" onclick="closeSheets()">Продолжить покупки</button>
+</div>
+
+<nav class="bottom">
+  <div class="item active" onclick="scrollToCatalog()"><span class="icon">🏠</span>Главная</div>
+  <div class="item" onclick="scrollToCatalog()"><span class="icon">📋</span>Каталог</div>
+  <div class="item" onclick="openCart()">
+    <span class="icon">🛒</span>Корзина
+    <span class="badge" id="navCartBadge" style="display:none;">0</span>
+  </div>
+  <div class="item" onclick="alert('Профиль появится совсем скоро ☁️')"><span class="icon">🕵️</span>Профиль</div>
+</nav>
+
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+// ===== КАТАЛОГ (держите в актуальном состоянии вручную, если меняете основной бот) =====
+const CATALOG = {
+  "Waka": [
+    {id:"waka_30000", name:"Waka 30000", price:2550, flavors:["Сладкая мята","Ягоды карамель","Клубника арбуз","Кислое яблоко","Киви лайм"]},
+    {id:"waka_10000", name:"Waka 10000 Upgrade", price:2100, flavors:["Гуава Малина","Арбуз","Арбуз со льдом","Клубника киви","Клубника Виноград","Клюква виноград","Виноград ягоды","Малина Мохито","Клубника Малина вишня","Кислое яблоко","Ананас лимон","Тройная Ягода","Энергетик","Вишня","Черника Вишня Клюква","Черника Малина Лимон","Черника Кислая малина","Черника Вишня","Черника Мята"]},
+    {id:"waka_8000", name:"Waka 8000 Slim", price:1950, flavors:["Черника кислая малина","Виноград со льдом","С ароматом кола","Клубника виноград","С ароматом дыня","С ароматом свежая мята"]},
+    {id:"waka_smash_6000", name:"Waka Smash 6000", price:1600, flavors:["Банан кокос","Банан дыня","Ежевичная волна"]},
+    {id:"waka_20000", name:"Waka 20000", price:2550, flavors:["Raspberry dark sparkle","Watermelon Cherry","Sakura grape","Dark cherry","Triple berry","Черника малина","Черника вишня клюква","Арбуз вишня","Тройная ягода","Клубника арбуз","Клюква виноград","Вишня"]},
+    {id:"waka_35000", name:"Waka 35000", price:2650, flavors:["Зелёный виноград","Сакура виноград","Черника малина","Черника малина ментол","Жевательная резинка с кислинкой","Тройная ягода","Киви маракуйя гуава","Клубника малина","Манговое смузи","Вишня","Арбуз"]}
+  ],
+  "Vapeak": [
+    {id:"vapeak_jellybar_3500", name:"Vapeak JellyBar 3500", price:899, flavors:["Белый персик малина","Зелёное яблоко виноград","Клубника персик груша","Клубнично-арбузная жвачка","Вишня гранат"]}
+  ],
+  "MaskKing": [
+    {id:"maskking_extra_100k", name:"MaskKing Extra 100K", price:2700, flavors:["Мексиканское манго","Ледяная голубая малина","Вишнёвый слаш","Кислое яблоко","Клубничный бриз","Ягодный взрыв","Клубничные леденцы","Гранат лёд","Арбузный лёд","Клубничное мороженое"]}
+  ],
+  "Elf Bar": [
+    {id:"elfbar_23000", name:"Elf Bar GH23000", price:2450, flavors:["Лайм грейпфрут лед","Черника груша"]},
+    {id:"elfbar_30k_ice_king", name:"Elf Bar 30K Ice King", price:2500, flavors:["Ледяной арбуз","Леденец кислое яблоко","Кислая клубника питайя","Чай лимон лайм","Зелёный чай грейпфрут","Гранатовый всплеск"]}
+  ]
+};
+const CITIES = ["Бишкек","Ош","Джалал-Абад","Каракол","Талас","Нарын","Баткен"];
+
+let currentBrand = Object.keys(CATALOG)[0];
+let cart = [];
+
+function extractPuff(name){
+  const m = name.match(/\d+/g);
+  if(!m) return 0;
+  return Math.max(...m.map(Number));
+}
+
+function renderTabs(){
+  const wrap = document.getElementById('brandTabs');
+  wrap.innerHTML = '';
+  Object.keys(CATALOG).forEach(brand=>{
+    const el = document.createElement('div');
+    el.className = 'tab' + (brand===currentBrand ? ' active' : '');
+    el.textContent = brand;
+    el.onclick = ()=>{ currentBrand = brand; renderTabs(); renderGrid(); };
+    wrap.appendChild(el);
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML = '';
+  const models = [...CATALOG[currentBrand]].sort((a,b)=>extractPuff(b.name)-extractPuff(a.name));
+  models.forEach(m=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="flavor-count">${m.flavors.length} вкусов</div>
+      <div class="puff-badge">☁️</div>
+      <h3>${m.name}</h3>
+      <div class="price">${m.price} сом</div>
+    `;
+    card.onclick = ()=> openFlavors(m);
+    grid.appendChild(card);
+  });
+}
+
+function openFlavors(model){
+  document.getElementById('flavorTitle').textContent = model.name;
+  document.getElementById('flavorSub').textContent = `${model.price} сом · выберите вкус`;
+  const list = document.getElementById('flavorList');
+  list.innerHTML = '';
+  model.flavors.forEach(f=>{
+    const row = document.createElement('div');
+    row.className = 'flavor-row';
+    row.innerHTML = `<span>${f}</span><div class="add-mark">+</div>`;
+    row.onclick = ()=>{
+      cart.push({modelId:model.id, name:model.name, flavor:f, price:model.price});
+      updateCartBadges();
+      closeSheets();
+      if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    };
+    list.appendChild(row);
+  });
+  showSheet('flavorSheet');
+}
+
+function updateCartBadges(){
+  const n = cart.length;
+  document.getElementById('cartPillText').textContent = `Корзина ${n}`;
+  const navBadge = document.getElementById('navCartBadge');
+  if(n>0){ navBadge.style.display='flex'; navBadge.textContent = n; } else { navBadge.style.display='none'; }
+}
+
+function renderCart(){
+  const listEl = document.getElementById('cartList');
+  const totalRow = document.getElementById('totalRow');
+  const fields = document.getElementById('checkoutFields');
+  const btn = document.getElementById('checkoutBtn');
+  listEl.innerHTML = '';
+
+  if(cart.length===0){
+    listEl.innerHTML = '<div class="empty-note">Корзина пока пуста ☁️<br>Загляните в каталог и добавьте вкус</div>';
+    totalRow.style.display='none';
+    fields.style.display='none';
+    btn.textContent = 'Оформить заказ';
+    btn.disabled = true;
+    return;
+  }
+
+  cart.forEach((item, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <div class="info"><b>${item.name}</b>${item.flavor}<br><button class="remove" onclick="removeItem(${idx})">Убрать</button></div>
+      <div class="price">${item.price} сом</div>
+    `;
+    listEl.appendChild(row);
+  });
+
+  const total = cart.reduce((s,i)=>s+i.price,0);
+  totalRow.style.display='flex';
+  document.getElementById('totalPrice').textContent = total + ' сом';
+  fields.style.display='block';
+  btn.disabled = false;
+  btn.textContent = `Оформить заказ · ${total} сом`;
+}
+
+function removeItem(idx){
+  cart.splice(idx,1);
+  updateCartBadges();
+  renderCart();
+}
+
+function handleCheckoutClick(){
+  const city = document.getElementById('cityInput').value;
+  const address = document.getElementById('addressInput').value.trim();
+  const phone = document.getElementById('phoneInput').value.trim();
+
+  if(!address || !phone){
+    if(tg) tg.showAlert('Заполните адрес и телефон, пожалуйста');
+    else alert('Заполните адрес и телефон, пожалуйста');
+    return;
+  }
+
+  const payload = {
+    type: 'cloud_order',
+    items: cart,
+    city, address, phone,
+    total: cart.reduce((s,i)=>s+i.price,0)
+  };
+
+  if(tg){
+    tg.sendData(JSON.stringify(payload));
+    tg.close();
+  } else {
+    alert('Демо-режим (не внутри Telegram):\n' + JSON.stringify(payload, null, 2));
+  }
+}
+
+function fillCities(){
+  const sel = document.getElementById('cityInput');
+  sel.innerHTML = CITIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function showSheet(id){
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById(id).classList.add('show');
+}
+function closeSheets(){
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('flavorSheet').classList.remove('show');
+  document.getElementById('cartSheet').classList.remove('show');
+}
+function openCart(){
+  renderCart();
+  showSheet('cartSheet');
+}
+function scrollToCatalog(){
+  document.getElementById('catalogAnchor').scrollIntoView({behavior:'smooth'});
+}
+
+renderTabs();
+renderGrid();
+fillCities();
+updateCartBadges();
+</script>
+</body>
+</html>
